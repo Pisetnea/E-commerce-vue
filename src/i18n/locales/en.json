@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "home": "Home",
+    "apparel": "Apparel",
+    "bags": "Bags",
+    "electronics": "Electronics",
+    "homeGoods": "Home",
+    "search": "Search products"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "account": "Account",
+    "customerAccount": "Customer account",
+    "newCustomer": "New customer",
+    "loginTitle": "Login to continue",
+    "registerTitle": "Create your account",
+    "loginHint": "Cart, wishlist, favorites, checkout, and payment actions require a customer account.",
+    "registerHint": "Register before using cart, favorites, wishlist, checkout, and payment features.",
+    "noAccount": "No account?",
+    "alreadyRegistered": "Already registered?",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "name": "Name",
+    "requiredNotice": "Please login or register before continuing.",
+    "cartRequired": "Please login or register before adding products to cart.",
+    "wishlistRequired": "Please login or register before adding products to wishlist.",
+    "checkoutRequired": "Please login or register before checkout or payment.",
+    "errors": {
+      "invalid": "Invalid email or password"
+    }
+  },
+  "shop": {
+    "curated": "Curated marketplace",
+    "heroTitle": "Discover products built for daily use.",
+    "heroText": "Browse fresh inventory from your Laravel backend with instant search, filters, and a synced cart.",
+    "heroSlideTwoEyebrow": "Fresh arrivals",
+    "heroSlideTwoTitle": "Upgrade your style with new-season essentials.",
+    "heroSlideTwoText": "Explore apparel, bags, electronics, and home goods in one fast storefront.",
+    "heroSlideThreeEyebrow": "Easy checkout",
+    "heroSlideThreeTitle": "Save favorites, manage cart, and pay from your account.",
+    "heroSlideThreeText": "Customer actions stay protected until login or registration, keeping your store workflow clean.",
+    "availableItems": "available items",
+    "filters": "Filters",
+    "reset": "Reset",
+    "sortBy": "Sort by",
+    "category": "Category",
+    "priceRange": "Price range",
+    "catalog": "Catalog",
+    "shopProducts": "Shop Products",
+    "items": "{count} items",
+    "noProducts": "No products found",
+    "noProductsText": "Check your backend products endpoint or clear the selected filters.",
+    "quickAdd": "Quick Add",
+    "reviews": "{count} reviews",
+    "inStock": "{count} in stock",
+    "color": "Color",
+    "size": "Size",
+    "quantity": "Quantity",
+    "addToCart": "Add to Cart",
+    "favorite": "Favorite",
+    "specifications": "Product Specifications",
+    "shippingPolicy": "Shipping Policy",
+    "customerReviews": "Customer Reviews"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "yourItems": "Your items",
+    "emptyTitle": "Your cart is empty",
+    "emptyText": "Add a product from the catalog to start a checkout.",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout",
+    "orderSuccess": "Order submitted successfully.",
+    "checkoutFailed": "Checkout failed. Please try again."
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "khmer": "Khmer"
+  },
+  "footer": {
+    "description": "A modern Vue and Laravel commerce experience with synced products, protected cart actions, wishlist, and checkout.",
+    "shop": "Shop",
+    "support": "Support",
+    "shipping": "Shipping policy",
+    "payment": "Secure payment",
+    "contact": "Contact support",
+    "copyright": "© 2026 Ecommercer. All rights reserved."
+  },
+  "profile": {
+    "title": "Customer profile",
+    "edit": "Edit profile",
+    "cartItems": "Cart items",
+    "wishlistItems": "Wishlist items",
+    "paymentStatus": "Payment status",
+    "paymentReady": "Ready"
+  }
+}
