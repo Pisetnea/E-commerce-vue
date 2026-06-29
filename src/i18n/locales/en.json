@@ -109,6 +109,15 @@
     "myShoppingBag": "My Shopping Bag",
     "paymentAndContact": "Payment & Contact"
   },
+  "checkoutPage": {
+    "subtitle": "Complete your purchase securely",
+    "secure": "Secured checkout",
+    "paymentMethod": "Payment Method",
+    "summary": "Order Summary",
+    "placeOrder": "Place Order",
+    "fullCheckout": "Full Checkout Page",
+    "securePayment": "Your payment details are encrypted and secure."
+  },
   "payment": {
     "methods": "Payment Methods",
     "abaPay": "ABA PAY",
@@ -118,7 +127,14 @@
     "chipMongBank": "CHIP MONG BANK",
     "bankTransfer": "Bank Transfer",
     "cash": "Cash on Delivery",
-    "reference": "Payment reference / Account number"
+    "reference": "Payment reference / Account number",
+    "cardholderName": "Cardholder Name",
+    "cardNumber": "Card Number",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "cardPlaceholder": "John Doe",
+    "cardNumberPlaceholder": "0000 0000 0000 0000",
+    "expiryPlaceholder": "MM/YY"
   },
   "contact": {
     "preferred": "Preferred Contact Line",

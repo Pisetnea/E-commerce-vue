@@ -93,6 +93,15 @@
     "myShoppingBag": "កាបូបទំនិញរបស់ខ្ញុំ",
     "paymentAndContact": "Payment & Contact"
   },
+  "checkoutPage": {
+    "subtitle": "បញ្ចប់ការទិញរបស់អ្នកដោយសុវត្ថិភាព",
+    "secure": "ការទូទាត់ប្រកបដោយសុវត្ថិភាព",
+    "paymentMethod": "វិធីបង់ប្រាក់",
+    "summary": "សង្ខេបការបញ្ជាទិញ",
+    "placeOrder": "ដាក់ការបញ្ជាទិញ",
+    "fullCheckout": "ទំព័រទូទាត់ពេញ",
+    "securePayment": "ព័ត៌មានបង់ប្រាក់របស់អ្នកត្រូវបានអ៊ិនគ្រីប និងមានសុវត្ថិភាព។"
+  },
   "payment": {
     "methods": "វិធីបង់ប្រាក់",
     "abaPay": "ABA PAY",
@@ -102,7 +111,14 @@
     "chipMongBank": "CHIP MONG BANK",
     "bankTransfer": "ការផ្ទេរប្រាក់តាមធនាគារ",
     "cash": "បង់ប្រាក់ពេលទទួល",
-    "reference": "លេខយោង / លេខគណនី"
+    "reference": "លេខយោង / លេខគណនី",
+    "cardholderName": "ឈ្មោះម្ចាស់កាត",
+    "cardNumber": "លេខកាត",
+    "expiryDate": "កាលបរិច្ឆេទផុតកំណត់",
+    "cvv": "CVV",
+    "cardPlaceholder": "John Doe",
+    "cardNumberPlaceholder": "0000 0000 0000 0000",
+    "expiryPlaceholder": "MM/YY"
   },
   "contact": {
     "preferred": "ទំនាក់ទំនងសំណព្វ",

@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import ProductDetailView from '../views/ProductDetailView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import CheckoutView from '../views/CheckoutView.vue'
 import WishlistView from '../views/WishlistView.vue'
 import { useAuthStore } from '../stores/auth'
 
@@ -36,6 +37,12 @@ const router = createRouter({
       path: '/wishlist',
       name: 'wishlist',
       component: WishlistView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/checkout',
+      name: 'checkout',
+      component: CheckoutView,
       meta: { requiresAuth: true },
     },
     {

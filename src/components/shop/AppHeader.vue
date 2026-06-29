@@ -30,6 +30,10 @@ const paymentMethod = ref('aba_pay')
 const paymentReference = ref('')
 const contactMethod = ref('phone_call')
 const contactValue = ref('')
+const cardholderName = ref('')
+const cardNumber = ref('')
+const expiryDate = ref('')
+const cvv = ref('')
 
 const categories = computed(() => [
   { label: t('nav.apparel'), value: 'Apparel' },
@@ -41,9 +45,37 @@ const subtotalLabel = computed(() => `$${cartStore.subtotal.toFixed(2)}`)
 const taxLabel = computed(() => `$${cartStore.tax.toFixed(2)}`)
 const shippingLabel = computed(() => (cartStore.shipping ? `$${cartStore.shipping.toFixed(2)}` : t('cart.free')))
 const totalLabel = computed(() => `$${cartStore.total.toFixed(2)}`)
-const checkoutDisabled = computed(
-  () => cartStore.isEmpty || checkoutLoading.value || (paymentMethod.value !== 'cash' && !paymentReference.value.trim()),
-)
+const cardBrand = computed(() => {
+  const n = cardNumber.value.replace(/\D/g, '')
+  if (n.startsWith('4')) return 'visa'
+  if (/^5[1-5]/.test(n)) return 'mastercard'
+  if (/^3[47]/.test(n)) return 'amex'
+  return ''
+})
+const formattedDisplay = computed(() => {
+  const n = cardNumber.value.replace(/\D/g, '')
+  const groups = n.match(/.{1,4}/g)
+  return groups ? groups.join(' ') : ''
+})
+const isValidCreditCard = computed(() => {
+  if (paymentMethod.value !== 'credit_card') return true
+  const n = cardNumber.value.replace(/\D/g, '')
+  if (n.length < 13 || n.length > 16) return false
+  let sum = 0; let alt = false
+  for (let i = n.length - 1; i >= 0; i--) {
+    let d = Number(n[i])
+    if (alt) { d *= 2; if (d > 9) d -= 9 }
+    sum += d; alt = !alt
+  }
+  return sum % 10 === 0
+})
+const checkoutDisabled = computed(() => {
+  if (cartStore.isEmpty || checkoutLoading.value) return true
+  if (paymentMethod.value === 'credit_card') {
+    return !cardholderName.value.trim() || !cardNumber.value.trim() || !isValidCreditCard.value || !expiryDate.value.trim() || !cvv.value.trim()
+  }
+  return paymentMethod.value !== 'cash' && !paymentReference.value.trim()
+})
 
 async function submitSearch() {
   await productsStore.setSearch(search.value)
@@ -58,6 +90,17 @@ function goToCategory(category) {
   router.push({ name: 'home', query: { category } })
 }
 
+function formatCardNumber(e) {
+  const raw = e.target.value.replace(/\D/g, '').slice(0, 16)
+  cardNumber.value = raw.replace(/(.{4})/g, '$1 ').trim()
+}
+
+function formatExpiry(e) {
+  let raw = e.target.value.replace(/\D/g, '').slice(0, 4)
+  if (raw.length > 2) raw = raw.slice(0, 2) + '/' + raw.slice(2)
+  expiryDate.value = raw
+}
+
 async function checkout() {
   if (!authStore.requireAuth(t('auth.checkoutRequired'))) {
     goToAuth('login', t('auth.checkoutRequired'))
@@ -69,9 +112,14 @@ async function checkout() {
   checkoutSuccess.value = ''
 
   try {
+    const isCard = paymentMethod.value === 'credit_card'
     await createOrder(cartStore.items, {
       method: paymentMethod.value,
-      reference: paymentReference.value.trim(),
+      reference: isCard ? '' : paymentReference.value.trim(),
+      cardholderName: cardholderName.value,
+      cardNumber: cardNumber.value,
+      expiryDate: expiryDate.value,
+      cvv: cvv.value,
     }, {
       address: address.value,
       deliveryOption: deliveryOption.value,
@@ -80,6 +128,10 @@ async function checkout() {
     })
     cartStore.clearCart()
     paymentReference.value = ''
+    cardholderName.value = ''
+    cardNumber.value = ''
+    expiryDate.value = ''
+    cvv.value = ''
     checkoutSuccess.value = t('cart.orderSuccess')
   } catch (error) {
     checkoutError.value = error.response?.data?.message ?? t('cart.checkoutFailed')
@@ -357,8 +409,87 @@ onMounted(() => {
               <v-radio :label="t('payment.bankTransfer')" value="bank_transfer" color="primary" />
               <v-radio :label="t('payment.cash')" value="cash" color="primary" />
             </v-radio-group>
+            <template v-if="paymentMethod === 'credit_card'">
+              <div class="credit-card-wrapper mt-3">
+                <div class="card-preview" :class="cardBrand">
+                  <div class="card-chip" />
+                  <div class="card-brand-icon">
+                    <v-icon v-if="cardBrand === 'visa'" size="36">mdi-credit-card</v-icon>
+                    <v-icon v-else-if="cardBrand === 'mastercard'" size="36">mdi-credit-card</v-icon>
+                    <v-icon v-else size="36">mdi-credit-card-outline</v-icon>
+                  </div>
+                  <div class="card-number-display">
+                    {{ formattedDisplay || '&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;' }}
+                  </div>
+                  <div class="card-details">
+                    <div class="card-field">
+                      <span class="card-field-label">Card Holder</span>
+                      <span class="card-field-value">{{ cardholderName || 'Your Name' }}</span>
+                    </div>
+                    <div class="card-field">
+                      <span class="card-field-label">Expires</span>
+                      <span class="card-field-value">{{ expiryDate || 'MM/YY' }}</span>
+                    </div>
+                    <div class="card-field">
+                      <span class="card-field-label">CVV</span>
+                      <span class="card-field-value">{{ cvv ? '&bull;&bull;&bull;' : '&bull;&bull;&bull;' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <v-text-field
+                  v-model="cardholderName"
+                  class="mb-3"
+                  density="comfortable"
+                  hide-details
+                  :label="t('payment.cardholderName')"
+                  :placeholder="t('payment.cardPlaceholder')"
+                  prepend-inner-icon="mdi-account-outline"
+                  variant="outlined"
+                />
+                <v-text-field
+                  v-model="cardNumber"
+                  class="mb-3"
+                  density="comfortable"
+                  hide-details
+                  :label="t('payment.cardNumber')"
+                  :placeholder="t('payment.cardNumberPlaceholder')"
+                  maxlength="19"
+                  prepend-inner-icon="mdi-credit-card-outline"
+                  variant="outlined"
+                  @input="formatCardNumber"
+                />
+                <div class="d-flex ga-3">
+                  <v-text-field
+                    v-model="expiryDate"
+                    class="flex-grow-1"
+                    density="comfortable"
+                    hide-details
+                    :label="t('payment.expiryDate')"
+                    :placeholder="t('payment.expiryPlaceholder')"
+                    maxlength="5"
+                    prepend-inner-icon="mdi-calendar-month-outline"
+                    variant="outlined"
+                    @input="formatExpiry"
+                  />
+                  <v-text-field
+                    v-model="cvv"
+                    class="flex-shrink-0"
+                    density="comfortable"
+                    hide-details
+                    :label="t('payment.cvv')"
+                    maxlength="4"
+                    placeholder="&bull;&bull;&bull;"
+                    prepend-inner-icon="mdi-lock-outline"
+                    type="password"
+                    variant="outlined"
+                    style="max-width: 110px"
+                  />
+                </div>
+              </div>
+            </template>
             <v-text-field
-              v-if="paymentMethod !== 'cash'"
+              v-else-if="paymentMethod !== 'cash'"
               v-model="paymentReference"
               class="mt-3"
               density="comfortable"
@@ -417,6 +548,18 @@ onMounted(() => {
           <span class="text-subtitle-1 font-weight-bold">{{ t('cart.total') }}</span>
           <strong class="text-h5">{{ totalLabel }}</strong>
         </div>
+        <v-btn
+          block
+          class="mb-2"
+          color="secondary"
+          :disabled="cartStore.isEmpty"
+          prepend-icon="mdi-arrow-right"
+          size="small"
+          variant="outlined"
+          @click="router.push('/checkout'); drawer = false"
+        >
+          {{ t('checkoutPage.fullCheckout') }}
+        </v-btn>
         <v-btn
           block
           color="primary"
@@ -597,6 +740,126 @@ onMounted(() => {
   background: rgba(17, 24, 39, 0.96);
   border-top-color: rgba(148, 163, 184, 0.14);
   box-shadow: 0 -18px 44px rgba(0, 0, 0, 0.24);
+}
+
+.credit-card-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-preview {
+  position: relative;
+  background: linear-gradient(135deg, #1a237e 0%, #283593 40%, #0d47a1 100%);
+  border-radius: 14px;
+  color: #fff;
+  padding: 20px 22px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 28px rgba(13, 71, 161, 0.3);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.card-preview::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 220px;
+  height: 220px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 50%;
+}
+
+.card-preview::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 160px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 50%;
+}
+
+.card-chip {
+  width: 40px;
+  height: 30px;
+  background: linear-gradient(135deg, #ffd54f, #ffb300);
+  border-radius: 5px;
+  position: relative;
+  z-index: 1;
+}
+
+.card-chip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+.card-brand-icon {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+.card-number-display {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  font-family: 'Courier New', monospace;
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+  word-spacing: 6px;
+}
+
+.card-details {
+  display: flex;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.card-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-field-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  opacity: 0.75;
+  margin-bottom: 2px;
+}
+
+.card-field-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.card-preview.visa .card-brand-icon {
+  color: #1a1f71;
+}
+
+.card-preview.mastercard .card-brand-icon {
+  color: #ff5f00;
+}
+
+:global(.v-theme--dark) .card-preview {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width: 599px) {

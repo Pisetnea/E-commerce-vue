@@ -1,4 +1,5 @@
 import './assets/main.css'
+import './assets/payment.css'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 

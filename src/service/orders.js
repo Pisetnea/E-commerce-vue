@@ -8,6 +8,10 @@ export async function createOrder(cartItems, payment = {}, extra = {}) {
   const payload = {
     payment_method: payment.method,
     payment_reference: payment.reference,
+    cardholder_name: payment.cardholderName || '',
+    card_number: payment.cardNumber || '',
+    expiry_date: payment.expiryDate || '',
+    cvv: payment.cvv || '',
     subtotal,
     tax,
     shipping,
