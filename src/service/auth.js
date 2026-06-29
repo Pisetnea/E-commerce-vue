@@ -1,7 +1,14 @@
 import http from './http'
 
 function unwrapUser(payload) {
-  return payload?.data?.user ?? payload?.user ?? payload?.data ?? null
+  const user = payload?.data?.user ?? payload?.user
+  if (user) return user
+
+  const data = payload?.data
+  if (data?.email || data?.name) return data
+  if (payload?.email || payload?.name) return payload
+
+  return null
 }
 
 function unwrapToken(payload) {
@@ -28,6 +35,28 @@ export async function registerCustomer(payload) {
 
 export async function getProfile() {
   const { data } = await http.get('/profile')
+  return unwrapUser(data)
+}
+
+export async function updateProfile(payload) {
+  const hasImage = payload.avatar instanceof File
+  const body = hasImage ? new FormData() : {}
+
+  if (hasImage) {
+    body.append('_method', 'PATCH')
+    body.append('avatar', payload.avatar)
+    body.append('name', payload.name)
+  } else {
+    body.name = payload.name
+    body.avatar_url = payload.avatar_url
+  }
+
+  const { data } = hasImage
+    ? await http.post('/profile', body, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    : await http.patch('/profile', body)
+
   return unwrapUser(data)
 }
 

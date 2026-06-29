@@ -24,10 +24,26 @@
     "password": "Password",
     "confirmPassword": "Confirm password",
     "name": "Name",
+    "remember": "Remember me",
+    "forgotPassword": "Forgot password?",
     "requiredNotice": "Please login or register before continuing.",
     "cartRequired": "Please login or register before adding products to cart.",
     "wishlistRequired": "Please login or register before adding products to wishlist.",
     "checkoutRequired": "Please login or register before checkout or payment.",
+    "validation": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "nameMin": "Name must be at least 2 characters.",
+      "passwordMin": "Password must be at least 6 characters.",
+      "passwordMatch": "Passwords do not match."
+    },
+    "passwordStrength": {
+      "label": "Password strength",
+      "empty": "Start typing",
+      "weak": "Weak",
+      "medium": "Medium",
+      "strong": "Strong"
+    },
     "errors": {
       "invalid": "Invalid email or password"
     }
@@ -71,9 +87,23 @@
     "emptyTitle": "Your cart is empty",
     "emptyText": "Add a product from the catalog to start a checkout.",
     "subtotal": "Subtotal",
+    "tax": "Estimated tax",
+    "shipping": "Shipping",
+    "free": "Free",
+    "total": "Total",
     "checkout": "Checkout",
     "orderSuccess": "Order submitted successfully.",
     "checkoutFailed": "Checkout failed. Please try again."
+  },
+  "payment": {
+    "method": "Payment method",
+    "reference": "Card or wallet reference",
+    "card": "Card",
+    "paypal": "PayPal",
+    "cash": "Cash on delivery"
+  },
+  "theme": {
+    "toggle": "Toggle light or dark theme"
   },
   "language": {
     "label": "Language",
@@ -92,9 +122,16 @@
   "profile": {
     "title": "Customer profile",
     "edit": "Edit profile",
+    "save": "Save",
+    "cancel": "Cancel",
+    "profileImage": "Profile image",
     "cartItems": "Cart items",
     "wishlistItems": "Wishlist items",
     "paymentStatus": "Payment status",
-    "paymentReady": "Ready"
+    "paymentReady": "Ready",
+    "savedItems": "Saved items",
+    "savedProduct": "Saved product #{id}",
+    "emptyWishlist": "No saved products",
+    "emptyWishlistText": "Tap the heart on a product to save it here."
   }
 }

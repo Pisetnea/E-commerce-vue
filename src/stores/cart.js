@@ -10,9 +10,13 @@ export const useCartStore = defineStore('cart', () => {
   const error = ref('')
 
   const itemCount = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0))
+  const isEmpty = computed(() => items.value.length === 0)
   const subtotal = computed(() =>
     items.value.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
   )
+  const tax = computed(() => subtotal.value * 0.08)
+  const shipping = computed(() => (subtotal.value > 0 && subtotal.value < 75 ? 7.5 : 0))
+  const total = computed(() => subtotal.value + tax.value + shipping.value)
 
   async function fetchCart() {
     if (!authStore.isAuthenticated) return
@@ -37,19 +41,23 @@ export const useCartStore = defineStore('cart', () => {
     const existing = items.value.find((item) => item.product.id === product.id)
 
     if (existing) {
-      existing.quantity += quantity
+      const previousQuantity = existing.quantity
+      existing.quantity += Math.max(1, quantity)
       await syncUpdate(existing)
+      if (error.value) existing.quantity = previousQuantity
       return true
     }
 
-    const cartItem = { id: product.id, product, quantity }
+    const cartItem = { id: product.id, product, quantity: Math.max(1, quantity) }
     items.value.push(cartItem)
 
     try {
-      const response = await storeCartItem(product.id, quantity)
+      const response = await storeCartItem(product.id, cartItem.quantity)
       cartItem.id = response?.data?.id ?? response?.id ?? cartItem.id
     } catch (requestError) {
       error.value = requestError.response?.data?.message ?? 'Unable to sync cart item.'
+      items.value = items.value.filter((item) => item !== cartItem)
+      return false
     }
 
     return true
@@ -61,8 +69,10 @@ export const useCartStore = defineStore('cart', () => {
     const item = items.value.find((entry) => entry.product.id === productId)
     if (!item) return
 
+    const previousQuantity = item.quantity
     item.quantity += 1
     await syncUpdate(item)
+    if (error.value) item.quantity = previousQuantity
   }
 
   async function decrement(productId) {
@@ -76,14 +86,17 @@ export const useCartStore = defineStore('cart', () => {
       return
     }
 
+    const previousQuantity = item.quantity
     item.quantity -= 1
     await syncUpdate(item)
+    if (error.value) item.quantity = previousQuantity
   }
 
   async function removeItem(productId) {
     if (!authStore.requireAuth('Please login or register before updating your cart.')) return
 
     const item = items.value.find((entry) => entry.product.id === productId)
+    const previousItems = [...items.value]
     items.value = items.value.filter((entry) => entry.product.id !== productId)
 
     if (!item) return
@@ -92,6 +105,7 @@ export const useCartStore = defineStore('cart', () => {
       await deleteCartItem(item.id)
     } catch (requestError) {
       error.value = requestError.response?.data?.message ?? 'Unable to remove cart item.'
+      items.value = previousItems
     }
   }
 
@@ -100,6 +114,8 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   async function syncUpdate(item) {
+    error.value = ''
+
     try {
       await updateCartItem(item.id, item.quantity)
     } catch (requestError) {
@@ -112,7 +128,11 @@ export const useCartStore = defineStore('cart', () => {
     loading,
     error,
     itemCount,
+    isEmpty,
     subtotal,
+    tax,
+    shipping,
+    total,
     fetchCart,
     addItem,
     increment,

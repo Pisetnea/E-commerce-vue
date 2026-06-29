@@ -35,14 +35,21 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: ProfileView,
+      meta: { requiresAuth: true },
     },
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
+  const hasSession = await authStore.ensureSession()
 
-  if (to.meta.guestOnly && authStore.isAuthenticated) {
+  if (to.meta.requiresAuth && !hasSession) {
+    authStore.notice = 'Please login or register before continuing.'
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  if (to.meta.guestOnly && hasSession) {
     return '/'
   }
 

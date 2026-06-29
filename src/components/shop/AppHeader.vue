@@ -7,6 +7,7 @@ import { createOrder } from '../../service/orders'
 import { useAuthStore } from '../../stores/auth'
 import { useCartStore } from '../../stores/cart'
 import { useProductsStore } from '../../stores/products'
+import { useThemeStore } from '../../stores/theme'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,19 +15,33 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const productsStore = useProductsStore()
+const themeStore = useThemeStore()
 const drawer = ref(false)
 const search = ref('')
 const checkoutLoading = ref(false)
 const checkoutError = ref('')
 const checkoutSuccess = ref('')
+const paymentMethod = ref('card')
+const paymentReference = ref('')
 
 const categories = computed(() => [
-  t('nav.apparel'),
-  t('nav.bags'),
-  t('nav.electronics'),
-  t('nav.homeGoods'),
+  { label: t('nav.apparel'), value: 'Apparel' },
+  { label: t('nav.bags'), value: 'Bags' },
+  { label: t('nav.electronics'), value: 'Electronics' },
+  { label: t('nav.homeGoods'), value: 'Home' },
 ])
 const subtotalLabel = computed(() => `$${cartStore.subtotal.toFixed(2)}`)
+const taxLabel = computed(() => `$${cartStore.tax.toFixed(2)}`)
+const shippingLabel = computed(() => (cartStore.shipping ? `$${cartStore.shipping.toFixed(2)}` : t('cart.free')))
+const totalLabel = computed(() => `$${cartStore.total.toFixed(2)}`)
+const checkoutDisabled = computed(
+  () => cartStore.isEmpty || checkoutLoading.value || (paymentMethod.value !== 'cash' && !paymentReference.value.trim()),
+)
+const paymentOptions = computed(() => [
+  { title: t('payment.card'), value: 'card', props: { prependIcon: 'mdi-credit-card-outline' } },
+  { title: t('payment.paypal'), value: 'paypal', props: { prependIcon: 'mdi-wallet-outline' } },
+  { title: t('payment.cash'), value: 'cash', props: { prependIcon: 'mdi-cash' } },
+])
 
 async function submitSearch() {
   await productsStore.setSearch(search.value)
@@ -35,6 +50,10 @@ async function submitSearch() {
 function goToAuth(name, message) {
   authStore.notice = message
   router.push({ name, query: { redirect: route.fullPath } })
+}
+
+function goToCategory(category) {
+  router.push({ name: 'home', query: { category } })
 }
 
 async function checkout() {
@@ -48,8 +67,12 @@ async function checkout() {
   checkoutSuccess.value = ''
 
   try {
-    await createOrder(cartStore.items)
+    await createOrder(cartStore.items, {
+      method: paymentMethod.value,
+      reference: paymentReference.value.trim(),
+    })
     cartStore.clearCart()
+    paymentReference.value = ''
     checkoutSuccess.value = t('cart.orderSuccess')
   } catch (error) {
     checkoutError.value = error.response?.data?.message ?? t('cart.checkoutFailed')
@@ -83,12 +106,13 @@ onMounted(() => {
       <div class="d-none d-lg-flex align-center ga-1">
         <v-btn
           v-for="category in categories"
-          :key="category"
+          :key="category.value"
           class="nav-pill"
-          :text="category"
+          :text="category.label"
           rounded="lg"
           size="small"
           variant="flat"
+          @click="goToCategory(category.value)"
         />
       </div>
 
@@ -110,14 +134,40 @@ onMounted(() => {
 
       <LanguageSwitcher class="d-none d-md-block" />
 
+      <v-btn
+        :aria-label="t('theme.toggle')"
+        class="theme-button"
+        :icon="themeStore.icon"
+        variant="flat"
+        @click="themeStore.toggleTheme"
+      />
+
       <template v-if="authStore.isAuthenticated">
         <v-menu>
           <template #activator="{ props }">
-            <v-btn v-bind="props" class="account-button" prepend-icon="mdi-account-circle" variant="flat">
-              <span class="d-none d-md-inline">{{ authStore.customerName }}</span>
+            <v-btn
+              v-bind="props"
+              :aria-label="authStore.customerName"
+              class="profile-avatar-button"
+              icon
+              variant="flat"
+            >
+              <v-avatar size="42">
+                <v-img v-if="authStore.avatarUrl" :alt="authStore.customerName" cover :src="authStore.avatarUrl" />
+                <span v-else>{{ authStore.initials }}</span>
+              </v-avatar>
             </v-btn>
           </template>
           <v-list density="compact">
+            <v-list-item :subtitle="authStore.user?.email" :title="authStore.customerName">
+              <template #prepend>
+                <v-avatar size="36">
+                  <v-img v-if="authStore.avatarUrl" :alt="authStore.customerName" cover :src="authStore.avatarUrl" />
+                  <span v-else>{{ authStore.initials }}</span>
+                </v-avatar>
+              </template>
+            </v-list-item>
+            <v-divider />
             <v-list-item :title="t('auth.account')" prepend-icon="mdi-account-outline" @click="router.push('/profile')" />
             <v-list-item :title="t('auth.logout')" prepend-icon="mdi-logout" @click="logout" />
           </v-list>
@@ -145,7 +195,7 @@ onMounted(() => {
     </v-container>
   </v-app-bar>
 
-  <v-navigation-drawer v-model="drawer" class="cart-drawer" location="right" temporary width="420">
+  <v-navigation-drawer v-model="drawer" class="cart-drawer" location="right" temporary width="440">
     <div class="d-flex flex-column h-100">
       <div class="cart-drawer__header d-flex align-center justify-space-between pa-5">
         <div>
@@ -155,7 +205,7 @@ onMounted(() => {
         <v-btn aria-label="Close shopping cart" icon="mdi-close" variant="flat" @click="drawer = false" />
       </div>
 
-      <v-list v-if="cartStore.items.length" class="flex-grow-1 overflow-y-auto" lines="three">
+      <v-list v-if="cartStore.items.length" class="flex-grow-1 overflow-y-auto cart-list" lines="three">
         <v-list-item v-for="item in cartStore.items" :key="item.product.id" class="cart-item mx-3 my-2 py-3">
           <template #prepend>
             <v-img :src="item.product.image" class="rounded-lg mr-3" cover height="72" width="72" />
@@ -216,15 +266,49 @@ onMounted(() => {
           {{ checkoutSuccess }}
         </v-alert>
 
-        <div class="d-flex align-center justify-space-between mb-4">
+        <v-select
+          v-model="paymentMethod"
+          class="mb-3"
+          density="comfortable"
+          hide-details
+          :items="paymentOptions"
+          :label="t('payment.method')"
+          variant="outlined"
+        />
+        <v-text-field
+          v-if="paymentMethod !== 'cash'"
+          v-model="paymentReference"
+          class="mb-3"
+          density="comfortable"
+          hide-details
+          :label="t('payment.reference')"
+          prepend-inner-icon="mdi-shield-check-outline"
+          variant="outlined"
+        />
+
+        <div class="summary-line">
           <span class="text-body-1 text-medium-emphasis">{{ t('cart.subtotal') }}</span>
           <strong class="text-h6">{{ subtotalLabel }}</strong>
+        </div>
+        <div class="summary-line">
+          <span class="text-body-2 text-medium-emphasis">{{ t('cart.tax') }}</span>
+          <strong>{{ taxLabel }}</strong>
+        </div>
+        <div class="summary-line mb-4">
+          <span class="text-body-2 text-medium-emphasis">{{ t('cart.shipping') }}</span>
+          <strong>{{ shippingLabel }}</strong>
+        </div>
+        <v-divider class="mb-4" />
+        <div class="summary-line mb-4">
+          <span class="text-body-1 font-weight-bold">{{ t('cart.total') }}</span>
+          <strong class="text-h5">{{ totalLabel }}</strong>
         </div>
         <v-btn
           block
           color="primary"
-          :disabled="!cartStore.items.length"
+          :disabled="checkoutDisabled"
           :loading="checkoutLoading"
+          prepend-icon="mdi-lock-check-outline"
           size="large"
           @click="checkout"
         >
@@ -243,6 +327,14 @@ onMounted(() => {
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
   backdrop-filter: blur(22px);
   box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+}
+
+:global(.v-theme--dark) .app-header {
+  background:
+    linear-gradient(135deg, rgba(17, 24, 39, 0.94), rgba(15, 23, 42, 0.8)),
+    rgba(17, 24, 39, 0.88);
+  border-bottom-color: rgba(148, 163, 184, 0.16);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
 }
 
 .brand-link {
@@ -276,9 +368,25 @@ onMounted(() => {
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
 }
 
-.account-button {
+.theme-button {
   background: rgba(15, 23, 42, 0.06);
   color: #172033;
+}
+
+.profile-avatar-button {
+  background: rgba(15, 23, 42, 0.06);
+  border-radius: 999px;
+  color: #172033;
+  height: 48px;
+  min-width: 48px;
+  padding: 3px;
+}
+
+.profile-avatar-button :deep(.v-avatar) {
+  background: linear-gradient(135deg, #0f766e, #172033);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 800;
 }
 
 .header-search {
@@ -295,6 +403,33 @@ onMounted(() => {
   background: #f8fafc;
 }
 
+:global(.v-theme--dark) .nav-pill,
+:global(.v-theme--dark) .profile-avatar-button,
+:global(.v-theme--dark) .theme-button {
+  background: rgba(229, 237, 245, 0.08);
+  color: #e5edf5;
+}
+
+:global(.v-theme--dark) .nav-pill:hover {
+  background: rgba(45, 212, 191, 0.16);
+  color: #5eead4;
+}
+
+:global(.v-theme--dark) .header-search :deep(.v-field) {
+  background: rgba(17, 24, 39, 0.9);
+  border-color: rgba(148, 163, 184, 0.16);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+:global(.v-theme--dark) .cart-button {
+  background: #e5edf5;
+  color: #0b1120;
+}
+
+:global(.v-theme--dark) .cart-drawer {
+  background: #0f172a;
+}
+
 .cart-drawer__header {
   background: linear-gradient(135deg, #1f2937, #0f766e);
   color: #ffffff;
@@ -303,14 +438,33 @@ onMounted(() => {
 .cart-item {
   background: #ffffff;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+:global(.v-theme--dark) .cart-item {
+  background: rgba(17, 24, 39, 0.96);
+  border-color: rgba(148, 163, 184, 0.14);
 }
 
 .cart-footer {
   background: rgba(255, 255, 255, 0.94);
   border-top: 1px solid rgba(148, 163, 184, 0.2);
   box-shadow: 0 -18px 44px rgba(15, 23, 42, 0.08);
+}
+
+.summary-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+:global(.v-theme--dark) .cart-footer {
+  background: rgba(17, 24, 39, 0.96);
+  border-top-color: rgba(148, 163, 184, 0.14);
+  box-shadow: 0 -18px 44px rgba(0, 0, 0, 0.24);
 }
 
 @media (max-width: 599px) {

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
@@ -22,6 +22,14 @@ const selectedCategories = ref([])
 const sort = ref('Featured')
 const sortOptions = ['Featured', 'Price: Low to High', 'Price: High to Low', 'Top Rated']
 
+watch(
+  () => route.query.category,
+  (category) => {
+    selectedCategories.value = category ? [String(category)] : []
+  },
+  { immediate: true },
+)
+
 const filteredProducts = computed(() => {
   const visible = selectedCategories.value.length
     ? productsStore.products.filter((product) => selectedCategories.value.includes(product.category))
@@ -36,6 +44,11 @@ const filteredProducts = computed(() => {
 
 function viewProduct(product) {
   router.push({ name: 'product-detail', params: { id: product.id } })
+}
+
+function resetCategories() {
+  selectedCategories.value = []
+  router.push({ name: 'home' })
 }
 
 function requestLogin(message) {
@@ -81,7 +94,7 @@ onMounted(() => {
               size="small"
               :text="t('shop.reset')"
               variant="text"
-              @click="selectedCategories = []"
+              @click="resetCategories"
             />
           </div>
 
