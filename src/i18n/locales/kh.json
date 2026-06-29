@@ -71,9 +71,52 @@
     "emptyTitle": "កន្ត្រកទំនេរ",
     "emptyText": "បន្ថែមផលិតផលពីកាតាឡុក ដើម្បីចាប់ផ្តើមទូទាត់។",
     "subtotal": "សរុបរង",
+    "tax": "ពន្ធ",
+    "shipping": "ដឹកជញ្ជូន",
+    "free": "ឥតគិតថ្លៃ",
+    "total": "សរុប",
     "checkout": "ទូទាត់",
     "orderSuccess": "បានផ្ញើការបញ្ជាទិញដោយជោគជ័យ។",
     "checkoutFailed": "ការទូទាត់បរាជ័យ។ សូមព្យាយាមម្តងទៀត។"
+  },
+  "delivery": {
+    "address": "អាសយដ្ឋានដឹកជញ្ជូន",
+    "addAddress": "បន្ថែមអាសយដ្ឋាន",
+    "editAddress": "កែអាសយដ្ឋាន",
+    "addressPlaceholder": "បញ្ចូលអាសយដ្ឋានដឹកជញ្ជូនរបស់អ្នក",
+    "option": "ជម្រើសដឹកជញ្ជូន",
+    "virakBuntham": "Virak Buntham (2-3 ថ្ងៃ)",
+    "zandoBikers": "ZANDO Bikers (1-3 ថ្ងៃ)"
+  },
+  "checkout": {
+    "deliveryAndOrder": "Delivery & Order Summary",
+    "myShoppingBag": "កាបូបទំនិញរបស់ខ្ញុំ",
+    "paymentAndContact": "Payment & Contact"
+  },
+  "payment": {
+    "methods": "វិធីបង់ប្រាក់",
+    "abaPay": "ABA PAY",
+    "creditCard": "កាតឥណទាន/ដេប៊ីត",
+    "acledaPay": "ACLEDA PAY",
+    "wingBank": "Wing Bank",
+    "chipMongBank": "CHIP MONG BANK",
+    "bankTransfer": "ការផ្ទេរប្រាក់តាមធនាគារ",
+    "cash": "បង់ប្រាក់ពេលទទួល",
+    "reference": "លេខយោង / លេខគណនី"
+  },
+  "contact": {
+    "preferred": "ទំនាក់ទំនងសំណព្វ",
+    "phoneCall": "ទូរស័ព្ទ",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "placeholder": "លេខទូរស័ព្ទ ឬគណនី"
+  },
+  "wishlist": {
+    "title": "ទំនិញចូលចិត្ត",
+    "subtitle": "ទំនិញដែលបានរក្សាទុក",
+    "emptyTitle": "មិនទាន់មានទំនិញចូលចិត្ត",
+    "emptyText": "ចុចរូបសញ្ញាបេះដូងលើផលិតផលដើម្បីរក្សាទុកនៅទីនេះ។",
+    "browseProducts": "រកមើលផលិតផល"
   },
   "language": {
     "label": "ភាសា",

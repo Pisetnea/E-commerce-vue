@@ -95,12 +95,44 @@
     "orderSuccess": "Order submitted successfully.",
     "checkoutFailed": "Checkout failed. Please try again."
   },
+  "delivery": {
+    "address": "Delivery Address",
+    "addAddress": "Add Your Address",
+    "editAddress": "Edit Address",
+    "addressPlaceholder": "Enter your shipping address",
+    "option": "Delivery Option",
+    "virakBuntham": "Virak Buntham (2-3 days)",
+    "zandoBikers": "ZANDO Bikers (1-3 days)"
+  },
+  "checkout": {
+    "deliveryAndOrder": "Delivery & Order Summary",
+    "myShoppingBag": "My Shopping Bag",
+    "paymentAndContact": "Payment & Contact"
+  },
   "payment": {
-    "method": "Payment method",
-    "reference": "Card or wallet reference",
-    "card": "Card",
-    "paypal": "PayPal",
-    "cash": "Cash on delivery"
+    "methods": "Payment Methods",
+    "abaPay": "ABA PAY",
+    "creditCard": "Credit/Debit Card",
+    "acledaPay": "ACLEDA PAY",
+    "wingBank": "Wing Bank",
+    "chipMongBank": "CHIP MONG BANK",
+    "bankTransfer": "Bank Transfer",
+    "cash": "Cash on Delivery",
+    "reference": "Payment reference / Account number"
+  },
+  "contact": {
+    "preferred": "Preferred Contact Line",
+    "phoneCall": "Phone call",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "placeholder": "Phone number or account"
+  },
+  "wishlist": {
+    "title": "My Favorites",
+    "subtitle": "Saved items",
+    "emptyTitle": "No favorites yet",
+    "emptyText": "Tap the heart icon on a product to save it here.",
+    "browseProducts": "Browse Products"
   },
   "theme": {
     "toggle": "Toggle light or dark theme"

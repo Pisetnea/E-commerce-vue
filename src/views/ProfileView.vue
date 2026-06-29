@@ -100,7 +100,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-[1180px] px-4 py-10">
+  <main class="profile-wrapper mx-auto max-w-[1180px] px-4 py-10">
     <section class="overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-950/10">
       <div class="bg-gradient-to-br from-slate-900 via-teal-800 to-orange-500 px-6 py-10 text-white md:px-10">
           <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -333,5 +333,37 @@ onMounted(async () => {
 :global(.v-theme--dark) .profile-stat--active {
   background: rgba(30, 41, 59, 0.96);
   border-color: #2dd4bf;
+}
+
+:global(.v-theme--dark) .profile-dialog {
+  border-color: rgba(148, 163, 184, 0.14);
+}
+</style>
+
+<style>
+/* Tailwind dark overrides – unscoped so they match global utility classes */
+.v-theme--dark .profile-wrapper .bg-white {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
+}
+
+.v-theme--dark .profile-wrapper .bg-slate-50 {
+  background: rgba(30, 41, 59, 0.5) !important;
+}
+
+.v-theme--dark .profile-wrapper .text-slate-900 {
+  color: #e5edf5 !important;
+}
+
+.v-theme--dark .profile-wrapper .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.v-theme--dark .profile-wrapper .border-slate-200 {
+  border-color: rgba(148, 163, 184, 0.14) !important;
+}
+
+.v-theme--dark .profile-wrapper .shadow-slate-950\/10 {
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.3) !important;
 }
 </style>

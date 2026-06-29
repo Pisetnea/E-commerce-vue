@@ -215,6 +215,12 @@ onMounted(() => {
   border-radius: 18px;
 }
 
+:global(.v-theme--dark) .filter-panel,
+:global(.v-theme--dark) .catalog-toolbar {
+  background: rgba(17, 24, 39, 0.94);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
 @media (max-width: 1279px) {
   .filter-panel {
     position: static;

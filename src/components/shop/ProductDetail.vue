@@ -318,6 +318,17 @@ onMounted(() => {
   box-shadow: 0 16px 34px rgba(31, 41, 55, 0.22);
 }
 
+:global(.v-theme--dark) .product-gallery,
+:global(.v-theme--dark) .detail-panel,
+:global(.v-theme--dark) .detail-tabs {
+  background: rgba(17, 24, 39, 0.94);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+:global(.v-theme--dark) .thumbnail {
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
 @media (max-width: 959px) {
   .detail-panel {
     position: static;

@@ -229,4 +229,34 @@ const emit = defineEmits({
 .quick-add-button {
   box-shadow: 0 12px 26px rgba(31, 41, 55, 0.18);
 }
+
+:global(.v-theme--dark) .product-card {
+  background: rgba(17, 24, 39, 0.96);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+:global(.v-theme--dark) .product-title {
+  color: #e5edf5;
+}
+
+:global(.v-theme--dark) .category-chip {
+  background: rgba(45, 212, 191, 0.15);
+  color: #5eead4;
+}
+
+:global(.v-theme--dark) .quick-add {
+  background: #1e293b;
+  color: #e5edf5;
+}
+
+:global(.v-theme--dark) .favorite-button {
+  background: rgba(30, 41, 59, 0.94);
+  color: #e5edf5;
+}
+
+:global(.v-theme--dark) .favorite-button:hover,
+:global(.v-theme--dark) .favorite-button--active {
+  background: rgba(225, 29, 72, 0.2);
+  color: #fb7185;
+}
 </style>

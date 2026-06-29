@@ -7,6 +7,7 @@ import { createOrder } from '../../service/orders'
 import { useAuthStore } from '../../stores/auth'
 import { useCartStore } from '../../stores/cart'
 import { useProductsStore } from '../../stores/products'
+import { useWishlistStore } from '../../stores/wishlist'
 import { useThemeStore } from '../../stores/theme'
 
 const route = useRoute()
@@ -15,14 +16,20 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const productsStore = useProductsStore()
+const wishlistStore = useWishlistStore()
 const themeStore = useThemeStore()
 const drawer = ref(false)
 const search = ref('')
 const checkoutLoading = ref(false)
 const checkoutError = ref('')
 const checkoutSuccess = ref('')
-const paymentMethod = ref('card')
+const deliveryOption = ref('zando_bikers')
+const address = ref('')
+const showAddressForm = ref(false)
+const paymentMethod = ref('aba_pay')
 const paymentReference = ref('')
+const contactMethod = ref('phone_call')
+const contactValue = ref('')
 
 const categories = computed(() => [
   { label: t('nav.apparel'), value: 'Apparel' },
@@ -37,11 +44,6 @@ const totalLabel = computed(() => `$${cartStore.total.toFixed(2)}`)
 const checkoutDisabled = computed(
   () => cartStore.isEmpty || checkoutLoading.value || (paymentMethod.value !== 'cash' && !paymentReference.value.trim()),
 )
-const paymentOptions = computed(() => [
-  { title: t('payment.card'), value: 'card', props: { prependIcon: 'mdi-credit-card-outline' } },
-  { title: t('payment.paypal'), value: 'paypal', props: { prependIcon: 'mdi-wallet-outline' } },
-  { title: t('payment.cash'), value: 'cash', props: { prependIcon: 'mdi-cash' } },
-])
 
 async function submitSearch() {
   await productsStore.setSearch(search.value)
@@ -70,6 +72,11 @@ async function checkout() {
     await createOrder(cartStore.items, {
       method: paymentMethod.value,
       reference: paymentReference.value.trim(),
+    }, {
+      address: address.value,
+      deliveryOption: deliveryOption.value,
+      contactMethod: contactMethod.value,
+      contactValue: contactValue.value,
     })
     cartStore.clearCart()
     paymentReference.value = ''
@@ -183,6 +190,20 @@ onMounted(() => {
         </v-btn>
       </div>
 
+      <v-badge
+        :content="wishlistStore.productIds.length"
+        :model-value="wishlistStore.productIds.length > 0"
+        color="error"
+      >
+        <v-btn
+          aria-label="Open wishlist"
+          class="wishlist-button"
+          icon="mdi-heart-outline"
+          variant="flat"
+          @click="router.push('/wishlist')"
+        />
+      </v-badge>
+
       <v-badge :content="cartStore.itemCount" :model-value="cartStore.itemCount > 0" color="accent">
         <v-btn
           aria-label="Open shopping cart"
@@ -195,70 +216,183 @@ onMounted(() => {
     </v-container>
   </v-app-bar>
 
-  <v-navigation-drawer v-model="drawer" class="cart-drawer" location="right" temporary width="440">
+  <v-navigation-drawer v-model="drawer" class="cart-drawer" location="right" temporary width="660">
     <div class="d-flex flex-column h-100">
-      <div class="cart-drawer__header d-flex align-center justify-space-between pa-5">
-        <div>
-          <p class="text-overline mb-0">{{ t('cart.title') }}</p>
-          <h2 class="text-h6 font-weight-bold">{{ t('cart.yourItems') }}</h2>
-        </div>
+      <div class="cart-drawer__header d-flex align-center justify-space-between pa-4">
+        <h2 class="text-h6 font-weight-bold">{{ t('checkout.deliveryAndOrder') }}</h2>
         <v-btn aria-label="Close shopping cart" icon="mdi-close" variant="flat" @click="drawer = false" />
       </div>
 
-      <v-list v-if="cartStore.items.length" class="flex-grow-1 overflow-y-auto cart-list" lines="three">
-        <v-list-item v-for="item in cartStore.items" :key="item.product.id" class="cart-item mx-3 my-2 py-3">
-          <template #prepend>
-            <v-img :src="item.product.image" class="rounded-lg mr-3" cover height="72" width="72" />
-          </template>
-
-          <v-list-item-title class="font-weight-semibold text-wrap">
-            {{ item.product.title }}
-          </v-list-item-title>
-          <v-list-item-subtitle class="text-primary font-weight-bold mt-1">
-            ${{ item.product.price.toFixed(2) }}
-          </v-list-item-subtitle>
-
-          <div class="d-flex align-center justify-space-between mt-3">
-            <v-btn-group border density="compact" divided rounded="lg" variant="outlined">
-              <v-btn
-                aria-label="Decrease quantity"
-                icon="mdi-minus"
-                size="small"
-                @click="cartStore.decrement(item.product.id)"
-              />
-              <v-btn :text="String(item.quantity)" min-width="44" size="small" />
-              <v-btn
-                aria-label="Increase quantity"
-                icon="mdi-plus"
-                size="small"
-                @click="cartStore.increment(item.product.id)"
-              />
-            </v-btn-group>
-
-            <v-btn
-              aria-label="Remove item"
-              color="error"
-              icon="mdi-delete-outline"
-              size="small"
-              variant="text"
-              @click="cartStore.removeItem(item.product.id)"
-            />
-          </div>
-        </v-list-item>
-      </v-list>
-
-      <v-empty-state
-        v-else
-        class="flex-grow-1"
-        icon="mdi-cart-outline"
-        :text="authStore.isAuthenticated ? t('cart.emptyText') : t('auth.cartRequired')"
-        :title="t('cart.emptyTitle')"
-      />
-
-      <div class="cart-footer pa-4">
+      <div class="flex-grow-1 overflow-y-auto pa-4">
         <v-alert v-if="cartStore.error" class="mb-3" color="warning" density="compact" variant="tonal">
           {{ cartStore.error }}
         </v-alert>
+
+        <!-- Delivery Address -->
+        <div class="checkout-section mb-4">
+          <div class="d-flex align-center mb-2">
+            <v-icon class="mr-2" color="primary" size="small">mdi-truck-outline</v-icon>
+            <span class="text-subtitle-2 font-weight-bold">{{ t('delivery.address') }}</span>
+          </div>
+          <v-card variant="outlined" class="pa-4 rounded-lg">
+            <template v-if="!address">
+              <v-btn
+                block
+                color="primary"
+                variant="tonal"
+                prepend-icon="mdi-plus"
+                @click="showAddressForm = true"
+              >
+                {{ t('delivery.addAddress') }}
+              </v-btn>
+            </template>
+            <template v-else-if="showAddressForm">
+              <v-textarea
+                v-model="address"
+                auto-grow
+                :label="t('delivery.addressPlaceholder')"
+                rows="2"
+                variant="outlined"
+              />
+              <div class="d-flex ga-2 mt-2">
+                <v-btn color="primary" size="small" variant="flat" @click="showAddressForm = false">
+                  {{ t('profile.save') }}
+                </v-btn>
+                <v-btn size="small" variant="text" @click="address = ''; showAddressForm = false">
+                  {{ t('profile.cancel') }}
+                </v-btn>
+              </div>
+            </template>
+            <template v-else>
+              <p class="text-body-2 mb-2">{{ address }}</p>
+              <v-btn
+                size="x-small"
+                variant="text"
+                color="primary"
+                prepend-icon="mdi-pencil"
+                @click="showAddressForm = true"
+              >
+                {{ t('delivery.editAddress') }}
+              </v-btn>
+            </template>
+
+            <v-divider class="my-3" />
+
+            <span class="text-caption font-weight-bold text-medium-emphasis">{{ t('delivery.option') }}</span>
+            <v-radio-group v-model="deliveryOption" hide-details class="mt-1">
+              <v-radio :label="t('delivery.virakBuntham')" value="virak_buntham" color="primary" />
+              <v-radio :label="t('delivery.zandoBikers')" value="zando_bikers" color="primary" />
+            </v-radio-group>
+          </v-card>
+        </div>
+
+        <!-- My Shopping Bag -->
+        <div class="checkout-section mb-4">
+          <div class="d-flex align-center mb-2">
+            <v-icon class="mr-2" color="primary" size="small">mdi-bag-personal-outline</v-icon>
+            <span class="text-subtitle-2 font-weight-bold">{{ t('checkout.myShoppingBag') }}</span>
+            <v-chip v-if="cartStore.items.length" class="ml-2" color="primary" size="x-small" variant="flat">
+              {{ cartStore.itemCount }}
+            </v-chip>
+          </div>
+
+          <div v-if="cartStore.items.length" class="d-flex flex-column ga-2">
+            <div
+              v-for="item in cartStore.items"
+              :key="item.product.id"
+              class="cart-item d-flex align-center pa-3 ga-3 rounded-lg"
+            >
+              <v-img
+                :src="item.product.image"
+                class="rounded flex-shrink-0"
+                cover
+                height="64"
+                width="64"
+              />
+              <div class="flex-grow-1 min-w-0">
+                <p class="text-body-2 font-weight-semibold text-truncate mb-1">{{ item.product.title }}</p>
+                <p class="text-primary font-weight-bold text-body-2">${{ item.product.price.toFixed(2) }}</p>
+                <div class="d-flex align-center ga-2 mt-1">
+                  <v-btn-group border density="compact" divided rounded="lg" variant="outlined">
+                    <v-btn icon="mdi-minus" size="x-small" @click="cartStore.decrement(item.product.id)" />
+                    <v-btn :text="String(item.quantity)" min-width="30" size="x-small" />
+                    <v-btn icon="mdi-plus" size="x-small" @click="cartStore.increment(item.product.id)" />
+                  </v-btn-group>
+                  <v-btn
+                    aria-label="Remove item"
+                    icon="mdi-delete-outline"
+                    color="error"
+                    size="x-small"
+                    variant="text"
+                    @click="cartStore.removeItem(item.product.id)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <v-empty-state
+            v-else
+            icon="mdi-cart-outline"
+            :text="authStore.isAuthenticated ? t('cart.emptyText') : t('auth.cartRequired')"
+            :title="t('cart.emptyTitle')"
+          />
+        </div>
+
+        <!-- Payment & Contact -->
+        <div class="d-flex align-center mb-3">
+          <v-icon class="mr-2" color="primary" size="small">mdi-credit-card-outline</v-icon>
+          <span class="text-subtitle-2 font-weight-bold">{{ t('checkout.paymentAndContact') }}</span>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="checkout-section mb-4">
+          <v-card variant="outlined" class="pa-4 rounded-lg">
+            <span class="text-caption font-weight-bold text-medium-emphasis mb-2 d-block">{{ t('payment.methods') }}</span>
+            <v-radio-group v-model="paymentMethod" hide-details>
+              <v-radio :label="t('payment.abaPay')" value="aba_pay" color="primary" />
+              <v-radio :label="t('payment.creditCard')" value="credit_card" color="primary" />
+              <v-radio :label="t('payment.acledaPay')" value="acleda_pay" color="primary" />
+              <v-radio :label="t('payment.wingBank')" value="wing_bank" color="primary" />
+              <v-radio :label="t('payment.chipMongBank')" value="chip_mong" color="primary" />
+              <v-radio :label="t('payment.bankTransfer')" value="bank_transfer" color="primary" />
+              <v-radio :label="t('payment.cash')" value="cash" color="primary" />
+            </v-radio-group>
+            <v-text-field
+              v-if="paymentMethod !== 'cash'"
+              v-model="paymentReference"
+              class="mt-3"
+              density="comfortable"
+              hide-details
+              :label="t('payment.reference')"
+              prepend-inner-icon="mdi-shield-check-outline"
+              variant="outlined"
+            />
+          </v-card>
+        </div>
+
+        <!-- Preferred Contact -->
+        <div class="checkout-section mb-4">
+          <v-card variant="outlined" class="pa-4 rounded-lg">
+            <span class="text-caption font-weight-bold text-medium-emphasis mb-2 d-block">{{ t('contact.preferred') }}</span>
+            <v-radio-group v-model="contactMethod" hide-details inline>
+              <v-radio :label="t('contact.phoneCall')" value="phone_call" color="primary" />
+              <v-radio :label="t('contact.telegram')" value="telegram" color="primary" />
+              <v-radio :label="t('contact.whatsapp')" value="whatsapp" color="primary" />
+            </v-radio-group>
+            <v-text-field
+              v-model="contactValue"
+              class="mt-3"
+              density="comfortable"
+              hide-details
+              :label="t('contact.placeholder')"
+              prepend-inner-icon="mdi-phone-outline"
+              variant="outlined"
+            />
+          </v-card>
+        </div>
+      </div>
+
+      <div class="cart-footer pa-4">
         <v-alert v-if="checkoutError" class="mb-3" color="error" density="compact" variant="tonal">
           {{ checkoutError }}
         </v-alert>
@@ -266,41 +400,21 @@ onMounted(() => {
           {{ checkoutSuccess }}
         </v-alert>
 
-        <v-select
-          v-model="paymentMethod"
-          class="mb-3"
-          density="comfortable"
-          hide-details
-          :items="paymentOptions"
-          :label="t('payment.method')"
-          variant="outlined"
-        />
-        <v-text-field
-          v-if="paymentMethod !== 'cash'"
-          v-model="paymentReference"
-          class="mb-3"
-          density="comfortable"
-          hide-details
-          :label="t('payment.reference')"
-          prepend-inner-icon="mdi-shield-check-outline"
-          variant="outlined"
-        />
-
         <div class="summary-line">
-          <span class="text-body-1 text-medium-emphasis">{{ t('cart.subtotal') }}</span>
-          <strong class="text-h6">{{ subtotalLabel }}</strong>
+          <span class="text-body-2 text-medium-emphasis">{{ t('cart.subtotal') }}</span>
+          <strong>{{ subtotalLabel }}</strong>
         </div>
         <div class="summary-line">
           <span class="text-body-2 text-medium-emphasis">{{ t('cart.tax') }}</span>
           <strong>{{ taxLabel }}</strong>
         </div>
-        <div class="summary-line mb-4">
+        <div class="summary-line mb-2">
           <span class="text-body-2 text-medium-emphasis">{{ t('cart.shipping') }}</span>
           <strong>{{ shippingLabel }}</strong>
         </div>
-        <v-divider class="mb-4" />
-        <div class="summary-line mb-4">
-          <span class="text-body-1 font-weight-bold">{{ t('cart.total') }}</span>
+        <v-divider class="mb-2" />
+        <div class="summary-line mb-3">
+          <span class="text-subtitle-1 font-weight-bold">{{ t('cart.total') }}</span>
           <strong class="text-h5">{{ totalLabel }}</strong>
         </div>
         <v-btn
@@ -362,6 +476,16 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 
+.wishlist-button {
+  background: rgba(15, 23, 42, 0.06);
+  color: #172033;
+}
+
+:global(.v-theme--dark) .wishlist-button {
+  background: rgba(229, 237, 245, 0.08);
+  color: #e5edf5;
+}
+
 .cart-button {
   background: #172033;
   color: #ffffff;
@@ -401,6 +525,14 @@ onMounted(() => {
 
 .cart-drawer {
   background: #f8fafc;
+}
+
+.checkout-section :deep(.v-card) {
+  background: #ffffff;
+}
+
+:global(.v-theme--dark) .checkout-section :deep(.v-card) {
+  background: rgba(17, 24, 39, 0.96);
 }
 
 :global(.v-theme--dark) .nav-pill,
