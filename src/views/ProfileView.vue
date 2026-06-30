@@ -366,4 +366,16 @@ onMounted(async () => {
 .v-theme--dark .profile-wrapper .shadow-slate-950\/10 {
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.3) !important;
 }
+
+.v-theme--dark .profile-wrapper .text-teal-600 {
+  color: #5eead4 !important;
+}
+
+.v-theme--dark .profile-wrapper .text-rose-500 {
+  color: #fb7185 !important;
+}
+
+.v-theme--dark .profile-wrapper .text-orange-500 {
+  color: #fdba74 !important;
+}
 </style>

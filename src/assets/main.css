@@ -25,6 +25,10 @@ body {
   color: #e5edf5;
 }
 
+:root[data-theme='dark'] .v-icon {
+  opacity: 0.92;
+}
+
 a {
   color: inherit;
   text-decoration: none;

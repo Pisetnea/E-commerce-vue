@@ -451,4 +451,12 @@ onMounted(async () => {
   background: rgba(17, 24, 39, 0.96);
   border-color: rgba(148, 163, 184, 0.14);
 }
+
+.v-theme--dark .checkout-page .payment-method-card .v-icon:not(.text-secondary) {
+  color: #94a3b8 !important;
+}
+
+.v-theme--dark .checkout-page .secure-badge {
+  color: #4ade80;
+}
 </style>

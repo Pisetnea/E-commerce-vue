@@ -35,12 +35,26 @@ const cardNumber = ref('')
 const expiryDate = ref('')
 const cvv = ref('')
 
-const categories = computed(() => [
-  { label: t('nav.apparel'), value: 'Apparel' },
-  { label: t('nav.bags'), value: 'Bags' },
+const fallbackCategories = computed(() => [
+  { label: t('nav.apparel'), value: 'Clothing' },
   { label: t('nav.electronics'), value: 'Electronics' },
-  { label: t('nav.homeGoods'), value: 'Home' },
+  { label: t('nav.homeGoods'), value: 'Home & Garden' },
 ])
+const categories = computed(() => {
+  const categoryNames = productsStore.categories
+
+  if (!categoryNames.length) return fallbackCategories.value
+
+  return categoryNames.map((category) => ({
+    label: category,
+    value: category,
+  }))
+})
+const navFilters = computed(() => [
+  { label: t('nav.allProducts'), value: '' },
+  ...categories.value,
+])
+const activeCategory = computed(() => String(route.query.category ?? ''))
 const subtotalLabel = computed(() => `$${cartStore.subtotal.toFixed(2)}`)
 const taxLabel = computed(() => `$${cartStore.tax.toFixed(2)}`)
 const shippingLabel = computed(() => (cartStore.shipping ? `$${cartStore.shipping.toFixed(2)}` : t('cart.free')))
@@ -87,7 +101,10 @@ function goToAuth(name, message) {
 }
 
 function goToCategory(category) {
-  router.push({ name: 'home', query: { category } })
+  router.push({
+    name: 'home',
+    query: category ? { category } : {},
+  })
 }
 
 function formatCardNumber(e) {
@@ -149,6 +166,7 @@ async function logout() {
 onMounted(() => {
   authStore.fetchProfile()
   cartStore.fetchCart()
+  if (!productsStore.categoryOptions.length) productsStore.fetchCategories()
 })
 </script>
 
@@ -162,16 +180,16 @@ onMounted(() => {
         <span class="text-h6 font-weight-black d-none d-sm-inline">Ecommercer</span>
       </RouterLink>
 
-      <div class="d-none d-lg-flex align-center ga-1">
+      <div class="nav-filter-row d-none d-lg-flex align-center ga-1">
         <v-btn
-          v-for="category in categories"
-          :key="category.value"
-          class="nav-pill"
-          :text="category.label"
+          v-for="filter in navFilters"
+          :key="filter.value || 'all-products'"
+          :class="['nav-pill', { 'nav-pill--active': activeCategory === filter.value }]"
+          :text="filter.label"
           rounded="lg"
           size="small"
           variant="flat"
-          @click="goToCategory(category.value)"
+          @click="goToCategory(filter.value)"
         />
       </div>
 
@@ -607,16 +625,29 @@ onMounted(() => {
 .nav-pill {
   background: rgba(15, 23, 42, 0.04);
   color: #334155;
+  flex: 0 0 auto;
   transition:
     background-color 180ms ease,
     color 180ms ease,
     transform 180ms ease;
 }
 
+.nav-filter-row {
+  max-width: min(48vw, 560px);
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
 .nav-pill:hover {
   background: rgba(13, 148, 136, 0.12);
   color: #0f766e;
   transform: translateY(-1px);
+}
+
+.nav-pill--active {
+  background: rgba(13, 148, 136, 0.16);
+  color: #0f766e;
 }
 
 .wishlist-button {
@@ -687,6 +718,11 @@ onMounted(() => {
 
 :global(.v-theme--dark) .nav-pill:hover {
   background: rgba(45, 212, 191, 0.16);
+  color: #5eead4;
+}
+
+:global(.v-theme--dark) .nav-pill--active {
+  background: rgba(45, 212, 191, 0.2);
   color: #5eead4;
 }
 

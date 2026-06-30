@@ -1,6 +1,7 @@
 {
   "nav": {
     "home": "ទំព័រដើម",
+    "allProducts": "ទាំងអស់",
     "apparel": "សម្លៀកបំពាក់",
     "bags": "កាបូប",
     "electronics": "អេឡិចត្រូនិក",
@@ -24,10 +25,26 @@
     "password": "ពាក្យសម្ងាត់",
     "confirmPassword": "បញ្ជាក់ពាក្យសម្ងាត់",
     "name": "ឈ្មោះ",
+    "remember": "Remember me",
+    "forgotPassword": "Forgot password?",
     "requiredNotice": "សូមចូលគណនី ឬចុះឈ្មោះមុនពេលបន្ត។",
     "cartRequired": "សូមចូលគណនី ឬចុះឈ្មោះមុនពេលបន្ថែមផលិតផលទៅកន្ត្រក។",
     "wishlistRequired": "សូមចូលគណនី ឬចុះឈ្មោះមុនពេលបន្ថែមផលិតផលទៅបញ្ជីចូលចិត្ត។",
     "checkoutRequired": "សូមចូលគណនី ឬចុះឈ្មោះមុនពេលទូទាត់ ឬបង់ប្រាក់។",
+    "validation": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "nameMin": "Name must be at least 2 characters.",
+      "passwordMin": "Password must be at least 6 characters.",
+      "passwordMatch": "Passwords do not match."
+    },
+    "passwordStrength": {
+      "label": "Password strength",
+      "empty": "Start typing",
+      "weak": "Weak",
+      "medium": "Medium",
+      "strong": "Strong"
+    },
     "errors": {
       "invalid": "អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ"
     }
@@ -134,6 +151,9 @@
     "emptyText": "ចុចរូបសញ្ញាបេះដូងលើផលិតផលដើម្បីរក្សាទុកនៅទីនេះ។",
     "browseProducts": "រកមើលផលិតផល"
   },
+  "theme": {
+    "toggle": "Toggle light or dark theme"
+  },
   "language": {
     "label": "ភាសា",
     "english": "អង់គ្លេស",
@@ -151,9 +171,16 @@
   "profile": {
     "title": "ប្រវត្តិអតិថិជន",
     "edit": "កែប្រវត្តិ",
+    "save": "Save",
+    "cancel": "Cancel",
+    "profileImage": "Profile image",
     "cartItems": "ទំនិញក្នុងកន្ត្រក",
     "wishlistItems": "ទំនិញចូលចិត្ត",
     "paymentStatus": "ស្ថានភាពបង់ប្រាក់",
-    "paymentReady": "រួចរាល់"
+    "paymentReady": "រួចរាល់",
+    "savedItems": "Saved items",
+    "savedProduct": "Saved product #{id}",
+    "emptyWishlist": "No saved products",
+    "emptyWishlistText": "Tap the heart on a product to save it here."
   }
 }
