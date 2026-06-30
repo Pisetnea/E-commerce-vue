@@ -17,7 +17,6 @@
     "newCustomer": "New customer",
     "loginTitle": "Login to continue",
     "registerTitle": "Create your account",
-    "loginHint": "Cart, wishlist, favorites, checkout, and payment actions require a customer account.",
     "registerHint": "Register before using cart, favorites, wishlist, checkout, and payment features.",
     "noAccount": "No account?",
     "alreadyRegistered": "Already registered?",

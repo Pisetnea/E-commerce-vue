@@ -66,11 +66,7 @@ async function submit() {
     <v-row justify="center">
       <v-col cols="12" md="5" sm="8">
         <v-sheet class="auth-card pa-6 pa-md-8" rounded="lg">
-          <v-chip class="mb-4 auth-chip" color="secondary" label variant="flat">{{ t('auth.newCustomer') }}</v-chip>
-          <h1 class="text-h4 font-weight-black mb-2">{{ t('auth.registerTitle') }}</h1>
-          <p class="text-body-2 text-medium-emphasis mb-6">
-            {{ t('auth.registerHint') }}
-          </p>
+          <v-chip class="mb-4 auth-chip" color="secondary" label variant="flat">{{ t('auth.registerTitle') }}</v-chip>
 
           <v-alert v-if="authStore.notice" class="mb-4" color="warning" variant="tonal">
             {{ authStore.notice }}
